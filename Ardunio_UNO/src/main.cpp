@@ -1,9 +1,6 @@
 #include <Arduino.h>
-// #include <IRsend.h>
+
 #include <IRremote.h>
-
-
-
 #include <SendIR.h>
 
 int SEND_PIN = 10; //D8
@@ -59,11 +56,3 @@ void loop()
     //delay(100);
   }
 
-  /*void loop() {
-  
-  //Next send the NEC_HEX_VALUE signal defined above
-  Serial.println(F("Sending NEC_HEX_VALUE @ 38kHz"));
-  sendir.sendHexNEC(NEC_HEX_VALUE, NEC_BIT_COUNT, 1, 38);
-  delay(5000); //wait 5 seconds between each signal (change to suit)
-
-}*/

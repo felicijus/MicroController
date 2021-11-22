@@ -2,7 +2,6 @@
 #include "SendIR.h"
 
 
-
 unsigned char periodHigh = 0; //calculated once for each signal sent in initSoftPWM
 unsigned char periodLow = 0; //calculated once for each signal sent in initSoftPWM
 
