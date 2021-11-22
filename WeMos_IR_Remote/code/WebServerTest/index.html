@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>ESP Web Server</title>
+  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">
+  <link rel=\"icon\" href=\"data:,\">
+
+  <style>
+    html {
+      font-family: Helvetica;
+      display: inline-block;
+      margin: 0px auto;
+      text-align: center;
+    }
+
+    .button {
+      background-color: #195B6A;
+      border: none;
+      color: white;
+      padding: 16px 40px;
+      text-decoration: none;
+      font-size: 30px;
+      margin: 2px;
+      cursor: pointer;
+    }
+
+    .button2 {
+      background-color: #77878A;
+      border: none;
+      color: white;
+      padding: 16px 40px;
+      text-decoration: none;
+      font-size: 30px;
+      margin: 2px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div><img src="https://cdn3.iconfinder.com/data/icons/streamline-icon-set-free-pack/48/Streamline-16-512.png"
+      width="256" height="256"></div>
+  <h1>ESP8266 Universal IR Web Server</h1>
+
+  <div id="BUTTONSTATEPLACEHOLDER">%BUTTONSTATEPLACEHOLDER%</div>
+  <div id="BUTTONPLACEHOLDER">%BUTTONPLACEHOLDER%</div>
+
+
+  <p>Currently DEV Phase with NEC Protokoll.</p>
+</body>
+
+
+
+<script>
+
+  // Server-Sent Events (SSE)  
+  if (!!window.EventSource) {
+    var update_event = new EventSource('/events');
+
+    update_event.addEventListener('open', function (e) {
+      console.log("Events Connected");
+    }, false);
+
+    update_event.addEventListener('error', function (e) {
+      if (e.target.readyState != EventSource.OPEN) {
+        console.log("Events Disconnected");
+      }
+    }, false);
+
+    update_event.addEventListener('message', function (e) {
+      console.log("message", e.data);
+    }, false);
+
+
+    //Events
+    // FOR every Button with a State Event has to be created
+
+    update_event.addEventListener('BUTTON_URL', function (e) {
+      console.log("BUTTON_URL", e.data);
+      var data = e.data;
+
+      update_event.addEventListener(data, function (e) {
+        console.log("BUTTON", e.data);
+        document.getElementById(data).innerHTML = e.data;
+      }, false);
+
+    }, false);
+  }
+
+
+  function EventHandler(URL) {
+    update_event.addEventListener(URL, function (e) {
+      console.log("EventHandler", e.data);
+      document.getElementById(URL).innerHTML = e.data;
+    }, false);
+  }
+
+
+
+  // HTML inject Method with only the URL
+  function Button(URL) {
+    // 1st Get State
+    GET_STATE(function (_STATE) {
+      //console.debug(_STATE);
+
+      // 2nd Set Buttons
+      ButtonHandler(function (response) {
+        //console.debug(response);
+
+        // 3nd Update State
+        GET_STATE(function (GET_STATE) {
+          //console.debug(GET_STATE);
+          UPDATE_STATE(URL, GET_STATE);
+        }, URL);
+
+      }, URL, _STATE);
+
+    }, URL);
+  }
+
+  function ButtonHandler(callback, URL, STATE) {
+    if (STATE === "ON") {
+      var xhttp = new XMLHttpRequest();
+
+      xhttp.onload = function () {
+        callback(xhttp.responseText);
+      };
+
+      xhttp.open("GET", "/set?" + URL + "OFF", true);
+      xhttp.send();
+    }
+    else if (STATE === "OFF") {
+      var xhttp = new XMLHttpRequest();
+
+      xhttp.onload = function () {
+        callback(xhttp.responseText);
+      };
+
+      xhttp.open("GET", "/set?" + URL + "ON", true);
+      xhttp.send();
+    }
+  }
+
+  function GET_STATE(callback, URL) {
+    var xhttp = new XMLHttpRequest();
+    xhttp.onload = function () {
+      callback(xhttp.responseText);
+    };
+
+    xhttp.open("GET", "/get?" + URL, true);
+    xhttp.send();
+  }
+
+  function UPDATE_STATE(URL, STATE) {
+    document.getElementById(URL).innerHTML = STATE;
+  }
+
+
+</script>
+
+</html>
