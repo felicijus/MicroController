@@ -7,6 +7,8 @@ void loop() {
   PORTB |= (1<<PB0);
   delay(1000);
   PORTB &= ~(1<<PB0);
+
+  
   //digitalWrite(3, HIGH);
   //digitalWrite(3, LOW);
 
