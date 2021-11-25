@@ -17,14 +17,14 @@ unsigned int scaleFactor = 1;
 
 // the counterstart is set so that timer0 ticks every 64 clock cycles, and the
 // the overflow handler is called every 256 ticks.
-//#define MICROSECONDS_PER_TIMER2_OVERFLOW (clockCyclesToMicroseconds(64 * 256))
+
 
 volatile unsigned long timer2_overflow_count = 0;
 
 
 ISR(TIMER2_OVF_vect)
 {
-	timer2_overflow_count++;
+	++timer2_overflow_count;
 }
 
 
@@ -43,26 +43,28 @@ unsigned long micros_own(){
   }
 	SREG = oldSREG;
 	
-	return ((m << 8) + t) * (4);   //16 clock cycles per us    64 / clockCyclesPerMicrosecond() --> 4 clock cycles
+	//return ((m << 8) + t) * (4);   //16 clock cycles per us    64 / clockCyclesPerMicrosecond() --> 4 clock cycles
+  return ((timer2_overflow_count << 8) * 4);
 }
+
 
 
 void setup() {
   Serial.begin(115200);
 
   cli();
-  // RESET ALL REGISTER
-  /*TCCR2A = 0x00;
+  // RESET ALL TIMER REGISTER
+  TCCR2A = 0x00;
   TCCR2B = 0x00;
   TIMSK2 = 0x00;
   TCNT2 = 0x00;
-  */
+  
 
-  // Set REGISTER
+  // Set TIMER REGISTER
   TCCR2A = 0x00; // Wave Form Generation Mode 0: Normal Mode, OC2A disconnected
   TCCR2B = (1<<CS22) + (0<<CS21) + (0<<CS20); // counterstart = 64 [every 8th system clock count up]
   TIMSK2 = (1<<TOIE2); // interrupt when TCNT2 is overflowed
-  TCNT2 = counterstart; //count from "counterstart" to 256
+  //TCNT2 = counterstart; //count from "counterstart" to 256
   sei();
 
   //_MMIO_BYTE(0x0100) = 0b0;  //SRAM first Adress
