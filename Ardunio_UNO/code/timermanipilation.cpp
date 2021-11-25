@@ -41,9 +41,9 @@ void setup(){
 
   cli();
   TCCR2A = (1<<WGM21); // Wave Form Generation Mode 2: CTC, OC2A disconnected
-  TCCR2B = (0<<CS22) + (0<<CS21) + (1<<CS20); // prescaler = 8
+  TCCR2B = (0<<CS22) + (1<<CS21) + (1<<CS20); // prescaler = 8
   TIMSK2 = (1<<OCIE2A); // interrupt when Compare Match with OCR2A
-  OCR2A = 159; //normally 16o but more accurate
+  OCR2A = 4; //normally 16o but more accurate
 
   sei();
 
