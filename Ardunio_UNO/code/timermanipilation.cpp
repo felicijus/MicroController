@@ -1,6 +1,8 @@
 #include <Arduino.h>
 
 // https://www.exp-tech.de/blog/arduino-tutorial-timer
+// https://wolles-elektronikkiste.de/timer-und-pwm-teil-1
+// https://eleccelerator.com/avr-timer-calculator/ - Rechner
 
 /*
 8Bit Timer0 nicht nutzen da für millis(), micros(), delay() genutzt
@@ -8,43 +10,50 @@
 8Bit Timer2
 */
 
-//  f = Systemtakt[16000000 | 16MHz] / (prescaler * 256) [(optional) / i]
+//  f = Systemtakt[16000000 | 16MHz] / (counterstart * 256) [(optional) / i]
 
-void setup() {
-  Serial.begin(9600);
 
-  TCCR2A = 0x00; // Wave Form Generation Mode 0: Normal Mode, OC2A disconnected
-  TCCR2B = (1<<CS22) + (1<<CS21) + (0<<CS20); // prescaler = 1024 [every 1024th system clock count up]
-  TIMSK2 = (1<<TOIE2); // interrupt when TCNT2 is overflowed
+volatile unsigned long timer2_micros = 0;
 
-  //DDRB = 0b00000001;
-
-  DDRB |= (1<<PB0);  // Portmanipulation: replaces pinMode(8, OUTPUT);
+ISR (TIMER2_COMPA_vect){  // Interrupt Service Routine 
+  timer2_micros++;
 }
 
-void loop() {
-  /*PORTB |= (1<<PB0);
-  //digitalWrite(8, HIGH);
-  Serial.println("ON");
-  
-
-  delaynew(1000);
-
-  PORTB &= ~(1<<PB0);
-  //digitalWrite(8, LOW);
-  Serial.println("OFF");
-
-  delaynew(1000);
-  */
+unsigned long micros_10(){
+  return timer2_micros;
 }
 
-ISR(TIMER2_OVF_vect){
-  static int i = 0;
-  i++;
-  if(i==4){
-    PORTB ^= (1<<PB0); // toggle PB0
-    i=0;
-  }
-  
-  
+void delay_micros_10(unsigned long us_10)
+{
+	uint32_t start = micros_10();
+
+	while (us_10 > 0) {
+		yield();
+		while ( us_10 > 0 && (micros_10() - start) >= 1) {
+			us_10--;
+			start += 1;
+    }
+	}
+}
+
+void setup(){ 
+  Serial.begin(115200);
+
+  cli();
+  TCCR2A = (1<<WGM21); // Wave Form Generation Mode 2: CTC, OC2A disconnected
+  TCCR2B = (0<<CS22) + (0<<CS21) + (1<<CS20); // prescaler = 8
+  TIMSK2 = (1<<OCIE2A); // interrupt when Compare Match with OCR2A
+  OCR2A = 159; //normally 16o but more accurate
+
+  sei();
+
+  Serial.println("Timer SET");
+} 
+void loop() { 
+ 
+  delay(1000);
+  //delay_micros_10(100000); //100k us = 1000ms
+
+  //Serial.println(micros());
+  Serial.println(micros_10());
 }
