@@ -6,12 +6,14 @@
 class SendIR
 {
 private:
-   int _pin; 
+   int _SEND_PIN; 
 public:
-   SendIR(int pin);
-   void sendHexNEC(unsigned long sigCode, byte numBits, unsigned char repeats);
+   SendIR(int SEND_PIN);
+   void sendNEC(unsigned long sigCode,unsigned int repeats=0, byte numBits=32);
    void mark(unsigned int mLen);
    void space(unsigned int sLen);
+
+   void initSoftPWM(unsigned char carrierFreq=38);
 
 };
 

@@ -1,61 +1,50 @@
 #include <Arduino.h>
 
-// https://www.exp-tech.de/blog/arduino-tutorial-timer
-// https://wolles-elektronikkiste.de/timer-und-pwm-teil-1
-// https://eleccelerator.com/avr-timer-calculator/ - Rechner
 
-/*
-8Bit Timer0 nicht nutzen da für millis(), micros(), delay() genutzt
-16Bit Timer1
-8Bit Timer2
-*/
-
-//  f = Systemtakt[16000000 | 16MHz] / (prescaler * 256) [(optional) / i]
+//OC1B -> PB2 -> PIN10
 
 
-byte counterStart = 123;
 
-volatile unsigned long timer2_micros = 0;
-
-ISR(TIMER2_OVF_vect){
-  
-  TCNT2 = counterStart;
-  
-  timer2_micros++;
-  
-}
-
-unsigned long micros_own(){
-  return timer2_micros;
-}
-
-void setup() {
-  Serial.begin(115200);
-
-   // RESET ALL TIMER REGISTER
-  TCCR2A = 0x00;
-  TCCR2B = 0x00;
-  TIMSK2 = 0x00;
-  TCNT2 = 0x00;
-
-  TCCR2A = 0x00; // Wave Form Generation Mode 0: Normal Mode, OC2A disconnected
-  TCCR2B = (0<<CS22) + (0<<CS21) + (1<<CS20); // prescaler = 8 [every 8th system clock count up]
-  TIMSK2 = (1<<TOIE2); // interrupt when TCNT2 is overflowed
-  TCNT2 = counterStart; //count from "counterstart" to 256
-
-}
-
-void loop() {
-  delay(10000);
-  
-  Serial.println(micros_own());
-
-  Serial.println(micros());
+void setup(){ 
+  // Clear OC1A and OC1B on Compare Match / Set OC1A and OC1B at Bottom; 
+  // Wave Form Generator: Fast PWM 14, Top = ICR1
+  TCCR1A = (1<<COM1A1) + (1<<COM1B1) + (1<<WGM11); 
+  TCCR1B = (1<<WGM13) + (1<<WGM12);
+  TCCR1B |= (1<<CS12) + (0<<CS11) + (0<<CS10);
+  ICR1 = 6249;
+  OCR1A = 0;
+  OCR1B = 3124;
+  DDRB |= (1<<PB2);
+} 
+void loop() { 
+  delay(500);
+  DDRB &= ~(1<<PB2);
+  pinMode(10,INPUT);
+  delay(500);
+  DDRB |= (1<<PB2);
+  pinMode(10,OUTPUT);
 }
 
 
 
+void halb_HZ(){
 
+  TCCR1A = (1<<COM1A1) + (1<<COM1B1) + (1<<WGM11); 
+  TCCR1B = (1<<WGM13) + (1<<WGM12);
+  TCCR1B |= (1<<CS12) + (0<<CS11) + (1<<CS10);
+  ICR1 = 31249;
+  OCR1A = 0;
+  OCR1B = 16625;
+  DDRB |= (1<<PB2);
+}
 
+void IR_HZ(){
 
-
+  TCCR1A = (1<<COM1A1) + (1<<COM1B1) + (1<<WGM11); 
+  TCCR1B = (1<<WGM13) + (1<<WGM12);
+  TCCR1B |= (0<<CS12) + (0<<CS11) + (1<<CS10);
+  ICR1 = 420; //-> 38kHz
+  OCR1A = 0;
+  OCR1B = 140;  //-> 33% Duty-Cycle
+  DDRB |= (1<<PB2);
+}

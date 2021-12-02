@@ -2,6 +2,7 @@
 
 #include <IRremote.h>
 #include <SendIR.h>
+#include <Timer.h>
 
 int SEND_PIN = 10; //D8
 int RECV_PIN = 9; //D7
@@ -14,12 +15,19 @@ decode_results results;
 
 #define NEC_HEX_VALUE 0xFF6897 //UL makes this an unsigned long
 #define NEC_BIT_COUNT 32
+
+
+Timer Timer2;
 SendIR sendir(SEND_PIN);
  
 void setup()
   {
     // irsend.begin();
-    Serial.begin(9600);
+    Serial.begin(115200);
+    
+    Timer2.Initialize();
+    Timer2.AttatchInterrupt();
+    
 
     irrecv.enableIRIn();
 
