@@ -1,7 +1,7 @@
 #include <Arduino.h>
 #include <SendIR.h>
 
-
+#include <Timer.h>
 
 
 unsigned char carrierFreq = 38; //NEC Carrier Frequenzie
@@ -29,8 +29,12 @@ SendIR::SendIR(int SEND_PIN)
   periodLow  -= 11; //Trim it based on measurementt from Oscilloscope
 }
 
-void SendIR::sendNEC(uint32_t NEC_Code, unsigned int repeats, byte numBits)
+void SendIR::sendNEC(unsigned long NEC_Code, unsigned int repeats, byte numBits)
 {
+  Timer1.Initialize();
+  Timer1.DetatchPWM();
+
+  
   /*  A basic 32 bit NEC signal is made up of:
    *  1 x 9000 uSec Header Mark, followed by
    *  1 x 4500 uSec Header Space, followed by
@@ -116,16 +120,24 @@ void SendIR::mark(unsigned int markLength)
   uint32_t now = micros();
   uint32_t dur = time - now; //allows for rolling time adjustment due to code execution delays
 
-
+  Timer1.AttatchPWM();
   if (dur == 0)return;
+  
+  
+  
+  
   
   while ((micros() - now) < dur) 
   { //Software PWM normally 38kHz 33% Duty-Cycle
-    digitalWrite(_SEND_PIN, HIGH);
+
+
+    
+    /*digitalWrite(_SEND_PIN, HIGH);
     if (periodHigh) delayMicroseconds(periodHigh);
     digitalWrite(_SEND_PIN, LOW);
-    if (periodLow)  delayMicroseconds(periodLow);
+    if (periodLow)  delayMicroseconds(periodLow);*/
   }
+  Timer1.DetatchPWM();
 }
 
 void SendIR::space(unsigned int spaceLength)

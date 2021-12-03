@@ -13,8 +13,6 @@ public:
    void mark(unsigned int mLen);
    void space(unsigned int sLen);
 
-   void initSoftPWM(unsigned char carrierFreq=38);
-
 };
 
 #endif

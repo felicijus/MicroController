@@ -14,16 +14,9 @@
 //  f = Systemtakt / ((OCRnx) * prescaler)
 // 100000 Hz = (16000000Hz /((4+1)*32))
 
-volatile unsigned long timer2_micros = 0;
-
-ISR(TIMER1_COMPA_vect)
-{ // Interrupt Service Routine
-  timer2_micros++;
-}
-
 void Timer::Initialize()
 {
-  cli();
+  // cli();
   /*
     //RESET ALL TIMER2 REGISTER
     TCCR2A = 0x00;
@@ -44,11 +37,11 @@ void Timer::Initialize()
 
     //OCR2A – Output Compare Register A
     OCR2A = 4;
-    
+
     sei();
     */
 
-  //RESET ALL TIMER2 REGISTER
+  // RESET ALL TIMER1 REGISTER
   TCCR1A = 0x00;
   TCCR1B = 0x00;
   TIMSK1 = 0x00;
@@ -56,28 +49,26 @@ void Timer::Initialize()
   OCR1A = 0x00;
   OCR1B = 0x00;
 
-  OCR1A = 15;
-
-  TCCR1A = (1 << COM1A0);                          // CTC mode, toggle OC1A on compare match
+  TCCR1A = (1 << COM1A1) + (1 << COM1B1) + (1 << WGM11);
+  TCCR1B = (1 << WGM13) + (1 << WGM12);
   TCCR1B |= (0 << CS12) + (0 << CS11) + (1 << CS10);
-  TCCR1B |= (1 << WGM12);
+  ICR1 = 420;  //-> 38kHz
+  OCR1A = 0;   // PIN 9
+  OCR1B = 210; // PIN 10 -> 50% Duty-Cycle
 
-  sei(); //allow interrupts
+  DDRB |= (1 << PB2);
+
+  // sei(); // allow interrupts
 }
 
-void Timer::AttatchInterrupt()
+void Timer::AttatchPWM()
 {
-  //TIMSK2 – Timer/Counter2 Interrupt Mask Register
-  TIMSK1 |= (1 << OCIE1A); //AttachInterrupt when Compare Match with OCR2A
-}
-void Timer::DetatchInterrupt()
-{
-  //TIMSK2 – Timer/Counter2 Interrupt Mask Register
-  TIMSK1 &= ~(1 << OCIE1A); //DetatchInterrupt when Compare Match with OCR2A
+  // PWM Aktivate [necessary after digitalWrite]
+  // TCCR1A |= (1<<COM1A1) + (1<<COM1B1);
+  TCCR1A |= 0b10100000;
 }
 
-unsigned long Timer::micros_10()
+void Timer::DetatchPWM()
 {
-
-  return timer2_micros;
+  TCCR1A &= ~(0b10100000);
 }

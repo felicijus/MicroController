@@ -10,14 +10,12 @@ private:
 public:
    
    void Initialize();
-   void AttatchInterrupt();
-   void DetatchInterrupt();
-
-   unsigned long micros_10();
-
+   
+   void AttatchPWM();
+   void DetatchPWM();
 };
 
 
-extern Timer Timer2;
+extern Timer Timer1;
 
 #endif

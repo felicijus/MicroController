@@ -1,50 +1,96 @@
 #include <Arduino.h>
 
+#include <IRremote.h>
+#include <SendIR.h>
 
-//OC1B -> PB2 -> PIN10
+
+int SEND_PIN = 10; // D8
+int RECV_PIN = 9;  // D7
+int LED_PIN = 8; // D6
+
+int BUTTON_PIN = 2;
+bool BUTTON_STATE;
+
+IRrecv irrecv(RECV_PIN);
+SendIR sendir(SEND_PIN);  //own Library
+
+unsigned long IR_TEMP = 0x0;
 
 
+void setup()
+{
+  Serial.begin(115200);
 
-void setup(){ 
-  // Clear OC1A and OC1B on Compare Match / Set OC1A and OC1B at Bottom; 
-  // Wave Form Generator: Fast PWM 14, Top = ICR1
-  TCCR1A = (1<<COM1A1) + (1<<COM1B1) + (1<<WGM11); 
-  TCCR1B = (1<<WGM13) + (1<<WGM12);
-  TCCR1B |= (1<<CS12) + (0<<CS11) + (0<<CS10);
-  ICR1 = 6249;
-  OCR1A = 0;
-  OCR1B = 3124;
-  DDRB |= (1<<PB2);
-} 
-void loop() { 
-  delay(500);
-  DDRB &= ~(1<<PB2);
-  pinMode(10,INPUT);
-  delay(500);
-  DDRB |= (1<<PB2);
-  pinMode(10,OUTPUT);
+  irrecv.enableIRIn();
+
+  // pinMode(LED_PIN, OUTPUT);
+  DDRB |= (1 << DDB0); // OUTPUT: 1  Input: 0
+
+  // pinMode(BUTTON_PIN, INPUT);
+  DDRD |= (0 << DDD2);
+  PORTD |= (0 << PORTD2); // PULL-UP: 1  Pull-DOWN: 0
+}
+
+
+void loop()
+{
+  // BUTTON_STATE = digitalRead(BUTTON_PIN);
+  BUTTON_STATE = (PIND & (1 << PD2));
+
+  if (irrecv.decode()) // Wenn ein IR-Signal erkannt wurde,
+  {
+    Serial.println(irrecv.decodedIRData.protocol);
+    Serial.println(irrecv.decodedIRData.decodedRawData, HEX); // LSB own SendIR is MSB
+
+    IR_TEMP = irrecv.decodedIRData.decodedRawData;
+
+    // MSB = reverse(IR_TEMP);
+    // Serial.println(MSB, HEX);
+    Serial.println();
+
+
+    delay(100); // TO prevent Crosstalk because of slow IR-Receiver in Devices -> wait
+    sendir.sendNEC(IR_TEMP, 3);
+    
+
+    // Short Status Signal
+    PORTB |= (1 << PB0); // PORT-Register B -> PB0 LSB -> OR 1<<0 [an Stelle 0 ein Bit geschoben] -> OR 00000001
+    delay(1);
+    PORTB &= ~(1 << PB0); // PORT-Register B -> PB0 LSB -> AND NOT 1<<0 -> AND NOT 00000001 -> AND 11111110
+
+    
+  }
+
+  
+  if (BUTTON_STATE == true)
+  {
+    Serial.println("LAST IR SIGNAL");
+    Serial.println(IR_TEMP, HEX);
+    Serial.println();
+
+    sendir.sendNEC(IR_TEMP, 3);
+
+    PORTB |= (1 << PB0); // PORT-Register B -> PB0 LSB -> OR 1<<0 [an Stelle 0 ein Bit geschoben] -> OR 00000001
+    delay(1);           
+    PORTB &= ~(1 << PB0); // PORT-Register B -> PB0 LSB -> AND NOT 1<<0 -> AND NOT 00000001 -> AND 11111110
+  }
+  
+  irrecv.resume();  // Receive ready for next IR-Code
+  delay(10);  
 }
 
 
 
-void halb_HZ(){
 
-  TCCR1A = (1<<COM1A1) + (1<<COM1B1) + (1<<WGM11); 
-  TCCR1B = (1<<WGM13) + (1<<WGM12);
-  TCCR1B |= (1<<CS12) + (0<<CS11) + (1<<CS10);
-  ICR1 = 31249;
-  OCR1A = 0;
-  OCR1B = 16625;
-  DDRB |= (1<<PB2);
-}
 
-void IR_HZ(){
-
-  TCCR1A = (1<<COM1A1) + (1<<COM1B1) + (1<<WGM11); 
-  TCCR1B = (1<<WGM13) + (1<<WGM12);
-  TCCR1B |= (0<<CS12) + (0<<CS11) + (1<<CS10);
-  ICR1 = 420; //-> 38kHz
-  OCR1A = 0;
-  OCR1B = 140;  //-> 33% Duty-Cycle
-  DDRB |= (1<<PB2);
+//MSB to LSB Converter
+unsigned long MSB;
+uint32_t MSB_LSB(uint32_t x)
+{
+  x = ((x >> 1) & 0x55555555u) | ((x & 0x55555555u) << 1);
+  x = ((x >> 2) & 0x33333333u) | ((x & 0x33333333u) << 2);
+  x = ((x >> 4) & 0x0f0f0f0fu) | ((x & 0x0f0f0f0fu) << 4);
+  x = ((x >> 8) & 0x00ff00ffu) | ((x & 0x00ff00ffu) << 8);
+  x = ((x >> 16) & 0xffffu) | ((x & 0xffffu) << 16);
+  return x;
 }
