@@ -11,8 +11,8 @@ public:
    
    void Initialize();
    
-   void AttatchPWM();
-   void DetatchPWM();
+   void activatePWM();
+   void disablePWM();
 };
 
 
