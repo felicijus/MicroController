@@ -37,7 +37,7 @@ void SendIR::sendNEC(unsigned long NEC_Code, unsigned int repeats, byte numBits)
 #define NEC_UNIT 562                              // 562 us -> 562.5 us
 
 #define NEC_HEADER_MARK           9000         // 9000 us
-#define NEC_HEADER_SPACE          45000        // 4500 us
+#define NEC_HEADER_SPACE          4500        // 4500 us
 
 #define NEC_BIT_MARK              NEC_UNIT        
 #define NEC_ONE_SPACE             1690         // 1690 us
