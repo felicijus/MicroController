@@ -33,17 +33,18 @@ void SendIR::sendNEC(unsigned long NEC_Code, unsigned int repeats, byte numBits)
 
   //  Possible generic repeat signal
 
-#define NEC_UNIT 562 // normally 562.5 us
+                                                  // used ->  normally 
+#define NEC_UNIT 562                              // 562 us -> 562.5 us
 
-#define NEC_HEADER_MARK           (16 * NEC_UNIT) // 8.992 us -> 9000 us
-#define NEC_HEADER_SPACE          (8 * NEC_UNIT) // 4.496 us -> 4500 us
+#define NEC_HEADER_MARK           (16 * NEC_UNIT) // 9000 us
+#define NEC_HEADER_SPACE          (8 * NEC_UNIT) // 4500 us
 
 #define NEC_BIT_MARK              NEC_UNIT        
-#define NEC_ONE_SPACE             (3 * NEC_UNIT) // 1686 us -> 1687.5 us
+#define NEC_ONE_SPACE             1690          // 1690 us
 #define NEC_ZERO_SPACE            NEC_UNIT      
 #define NEC_TRAILER_MARK          NEC_UNIT    
 
-#define NEC_REPEAT_HEADER_SPACE   (4 * NEC_UNIT) // 2248 us -> 2250
+#define NEC_REPEAT_HEADER_SPACE   2250          // 2250 us
 
   
   time = micros(); // Tracking of Signal Time
@@ -69,7 +70,7 @@ void SendIR::sendNEC(unsigned long NEC_Code, unsigned int repeats, byte numBits)
       mark(NEC_BIT_MARK);
       space(NEC_ZERO_SPACE);
     }
-    NEC_Code >>= 1;
+    NEC_Code >>= 1; // move to next bit
   }
   
   // Trailing Mark
