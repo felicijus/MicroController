@@ -3,6 +3,7 @@
 #include <IRremote.h>
 #include <SendIR.h>
 
+
 int SEND_PIN = 10; // D8
 int RECV_PIN = 9;  // D7
 int LED_PIN = 8; // D6
@@ -47,16 +48,20 @@ void loop()
     // Serial.println(MSB, HEX);
     Serial.println();
 
+
+    delay(100); // TO prevent Crosstalk because of slow IR-Receiver in Devices -> wait
     sendir.sendNEC(IR_TEMP, 3);
     
+
+    // Short Status Signal
     PORTB |= (1 << PB0); // PORT-Register B -> PB0 LSB -> OR 1<<0 [an Stelle 0 ein Bit geschoben] -> OR 00000001
     delay(1);
     PORTB &= ~(1 << PB0); // PORT-Register B -> PB0 LSB -> AND NOT 1<<0 -> AND NOT 00000001 -> AND 11111110
 
-    //irrecv.resume();
+    
   }
 
-
+  
   if (BUTTON_STATE == true)
   {
     Serial.println("LAST IR SIGNAL");
@@ -66,19 +71,21 @@ void loop()
     sendir.sendNEC(IR_TEMP, 3);
 
     PORTB |= (1 << PB0); // PORT-Register B -> PB0 LSB -> OR 1<<0 [an Stelle 0 ein Bit geschoben] -> OR 00000001
-    //PORTB &= ~(1 << PB0); // PORT-Register B -> PB0 LSB -> AND NOT 1<<0 -> AND NOT 00000001 -> AND 11111110
-    delay(1);           // NEC IR 67.5ms to fully transmit the message frame
+    delay(1);           
     PORTB &= ~(1 << PB0); // PORT-Register B -> PB0 LSB -> AND NOT 1<<0 -> AND NOT 00000001 -> AND 11111110
   }
   
-  irrecv.resume();
-  delay(1); // resume needs time
+  irrecv.resume();  // Receive ready for next IR-Code
+  delay(10);  
 }
 
 
 
+
+
+//MSB to LSB Converter
 unsigned long MSB;
-uint32_t reverse(uint32_t x)
+uint32_t MSB_LSB(uint32_t x)
 {
   x = ((x >> 1) & 0x55555555u) | ((x & 0x55555555u) << 1);
   x = ((x >> 2) & 0x33333333u) | ((x & 0x33333333u) << 2);

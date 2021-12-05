@@ -1,7 +1,7 @@
 #include <Arduino.h>
 
 #include <IRremote.h>
-#include <SendIR.h>
+#include <SendIR.h> //own Library
 
 
 int SEND_PIN = 10; // D8
@@ -12,7 +12,7 @@ int BUTTON_PIN = 2;
 bool BUTTON_STATE;
 
 IRrecv irrecv(RECV_PIN);
-SendIR sendir(SEND_PIN);  //own Library
+SendIR sendir(SEND_PIN);  
 
 unsigned long IR_TEMP = 0x0;
 
@@ -37,28 +37,23 @@ void loop()
   // BUTTON_STATE = digitalRead(BUTTON_PIN);
   BUTTON_STATE = (PIND & (1 << PD2));
 
-  if (irrecv.decode()) // Wenn ein IR-Signal erkannt wurde,
+  if (irrecv.decode()) // If IR Signal is detected
   {
     Serial.println(irrecv.decodedIRData.protocol);
     Serial.println(irrecv.decodedIRData.decodedRawData, HEX); // LSB own SendIR is MSB
 
     IR_TEMP = irrecv.decodedIRData.decodedRawData;
-
-    // MSB = reverse(IR_TEMP);
-    // Serial.println(MSB, HEX);
     Serial.println();
 
 
-    delay(100); // TO prevent Crosstalk because of slow IR-Receiver in Devices -> wait
+    delay(100); // To prevent Crosstalk because of slow IR-Receiver in Devices -> wait
     sendir.sendNEC(IR_TEMP, 3);
     
 
     // Short Status Signal
-    PORTB |= (1 << PB0); // PORT-Register B -> PB0 LSB -> OR 1<<0 [an Stelle 0 ein Bit geschoben] -> OR 00000001
+    PORTB |= (1 << PB0); // PORT-Register B -> PB0 LSB -> OR 1<<0 [Place 0 one Bit shifted] -> OR 00000001
     delay(1);
     PORTB &= ~(1 << PB0); // PORT-Register B -> PB0 LSB -> AND NOT 1<<0 -> AND NOT 00000001 -> AND 11111110
-
-    
   }
 
   
@@ -70,9 +65,9 @@ void loop()
 
     sendir.sendNEC(IR_TEMP, 3);
 
-    PORTB |= (1 << PB0); // PORT-Register B -> PB0 LSB -> OR 1<<0 [an Stelle 0 ein Bit geschoben] -> OR 00000001
+    PORTB |= (1 << PB0);
     delay(1);           
-    PORTB &= ~(1 << PB0); // PORT-Register B -> PB0 LSB -> AND NOT 1<<0 -> AND NOT 00000001 -> AND 11111110
+    PORTB &= ~(1 << PB0);
   }
   
   irrecv.resume();  // Receive ready for next IR-Code

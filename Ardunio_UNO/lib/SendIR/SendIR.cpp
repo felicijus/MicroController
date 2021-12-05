@@ -3,8 +3,8 @@
 
 #include <Timer.h>
 
-// https://techdocs.altium.com/display/FPGA/NEC+Infrared+Transmission+Protocol
 
+// https://techdocs.altium.com/display/FPGA/NEC+Infrared+Transmission+Protocol
 
 
 uint32_t time = 0;  // used in mark & space functions to keep track of time
@@ -57,7 +57,7 @@ void SendIR::sendNEC(unsigned long NEC_Code, unsigned int repeats, byte numBits)
   space(NEC_HEADER_SPACE);
 
   // 32 Bits
-  for (uint8_t bit = 0; bit < numBits; bit++) // signal from 1 bit up to 32 bits LSB
+  for (uint8_t bit = 0; bit < numBits; bit++) // signal from 1 bit up to 32 bits using LSB
   {
     if (NEC_Code & 1)
     { // 1 bit

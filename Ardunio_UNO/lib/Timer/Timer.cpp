@@ -1,7 +1,7 @@
 #include <Arduino.h>
-#include <Timer.h>
+#include <Timer.h>  //own Library
 
-// https://www.exp-tech.de/blog/arduino-tutorial-timer
+
 // https://wolles-elektronikkiste.de/timer-und-pwm-teil-1
 // https://eleccelerator.com/avr-timer-calculator/ - Rechner
 
