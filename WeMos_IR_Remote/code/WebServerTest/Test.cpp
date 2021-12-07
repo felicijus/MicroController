@@ -2,6 +2,15 @@
 #include <ESP8266WiFi.h>
 #include "ESPAsyncWebServer.h"
 
+#include <IRremoteESP8266.h>
+#include <IRsend.h>
+#include <IRrecv.h>
+
+IRsend IRTx(D8);
+IRrecv IRRx(D7);
+
+decode_results results;
+
 // Daten des WiFi-Netzwerks
 const char *ssid = "Obi-Wan";
 const char *password = "n9BcVp019DkF@PYdYwz4mRJ8";
@@ -250,6 +259,13 @@ void setup()
   // Set outputs to LOW
   digitalWrite(LED_PIN, LOW);
 
+
+  //IR
+  IRTx.begin();
+  IRRx.enableIRIn();
+
+
+
   // Connect to Wi-Fi
   WiFi.begin(ssid, password);
   while (WiFi.status() != WL_CONNECTED)
@@ -298,6 +314,11 @@ void setup()
               {
                 digitalWrite(LED_PIN, HIGH);
                 LED_PIN_STATE = "ON";
+                
+                IRTx.sendNEC(0x3EC1C23D);
+
+
+                ////
                 request->send(200, "text/plain", "ok");
               }
 
@@ -309,6 +330,11 @@ void setup()
               }
             });
 
+  server.on("/test", HTTP_GET, [](AsyncWebServerRequest *request)
+  {
+
+  });
+  
   server.onNotFound(notFound);
   // Start server
   server.begin();
@@ -316,6 +342,15 @@ void setup()
 
 void loop()
 {
+  
+  uint32 IR_TEMP;
+
+  if (IRRx.decode(&results)){
+    Serial.println(results.value, HEX);
+    IRRx.resume();
+  }
+
+
   if (LED_PIN_STATE != last_LED_PIN_STATE)
   {
     Serial.printf("LED PIN STATE = %s\n", LED_PIN_STATE);
@@ -337,4 +372,6 @@ void loop()
 
     lastTime = millis();
   }
+
+
 }
