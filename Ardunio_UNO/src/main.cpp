@@ -52,7 +52,7 @@ void loop()
 
     // Short Status Signal
     PORTB |= (1 << PB0); // PORT-Register B -> PB0 LSB -> OR 1<<0 [Place 0 one Bit shifted] -> OR 00000001
-    delay(10);
+    delay(100);
     PORTB &= ~(1 << PB0); // PORT-Register B -> PB0 LSB -> AND NOT 1<<0 -> AND NOT 00000001 -> AND 11111110
   }
 

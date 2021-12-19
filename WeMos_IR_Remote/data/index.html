@@ -1,13 +1,17 @@
 <html>
 
 <head>
+    <meta charset="uft-8">
     <title>ESP Web Server</title>
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <link rel="stylesheet" href="style.css">
+    
 </head>
 
 <body>
     <div class="container">
-
 
 
         <div class="header">
@@ -20,21 +24,21 @@
         </div>
 
         <div class="content">
-            <div>
-                <button class="button">ON OFF</button>
-                <button class="button"></button>
-                <button class="button">MUTE</button>
+            <div class="buttonrow">
+                <button id="3EC158A7">POWER</button>
+                <button id=""></button>
+                <button id="3EC14CB3">MUTE</button>
             </div>
             
-            <div>
-                <button class="button">OPTICAL</button>
-                <button class="button">LINE IN</button>
-                <button class="button">VOL+</button>
+            <div class="buttonrow">
+                <button id="3EC1827D">OPTICAL</button>
+                <button id="3EC12CD3">AUX</button>
+                <button id="3EC102FD">VOL UP</button>
             </div>
-            <div>
-                <button class="button">Bluetooth</button>
-                <button class="button">Release</button>
-                <button class="button">VOL-</button>
+            <div class="buttonrow">
+                <button id="3EC1CC33">Bluetooth</button>
+                <button id="3EC1E21D">Release</button>
+                <button id="3EC1C23D">VOL DOWN</button>
             </div>
         </div>
 
@@ -48,5 +52,7 @@
     </div>
 
 </body>
+
+<script src="script.js"></script>
 
 </html>
